@@ -50,4 +50,32 @@
 - **กลยุทธ์เข้าสู่ตลาด (GTM):** ทำการตลาดและขายตรงสู่กลุ่ม SME เน้นชูจุดขายเรื่อง "การเช็กสุขภาพทางการเงินและกำไรของร้านได้ทันที" เพื่อสร้างฐานลูกค้าแบบออร์แกนิก
 - **การพิตช์แผนธุรกิจ B2B2G:** นำบริษัทและข้อมูลผู้ใช้งานจริง (Traction Data) จากเฟสแรก เข้าพบฝ่ายสินเชื่อและทุนสนับสนุน Startup ของธนาคารออมสิน (GSB) นำเสนอแพลตฟอร์มในฐานะเครื่องมือช่วยคัดกรองความเสี่ยงในการปล่อยกู้ให้กลุ่มผู้ประกอบการฐานราก เพื่อสร้างข้อตกลงร่วม (MOU) ในการขยายสเกลระบบร่วมกัน
 
-```
+---
+
+## 4. การแบ่งงานทีมและสถานะการพัฒนา MVP (Team Workload & Development Status)
+
+ทีมพัฒนา (Coders) มี **2 คน** แบ่งงานฝั่ง Backend ออกเป็น 2 ส่วนที่ทำขนานกันได้ (Low Coupling) — Coder 1 วางฐานราก (ฐานข้อมูล + ตัวแยกข้อความ + ข้อมูลตั้งต้น) ให้เสร็จก่อน จากนั้น Coder 2 ต่อยอดบนข้อมูลเดโมได้ทันทีโดยไม่บล็อกกัน
+
+| Coder | บทบาท | ขอบเขตงาน | Tasks |
+| :--- | :--- | :--- | :--- |
+| **Coder 1 — Kanthi Phoosorn** | ฐานราก + โมดูลหลัก | Database schema + seed, ตัวแยกข้อความไทย (Keyword/NLP), ตัวคำนวณรอบงบ/วันที่, โมดูล **Categories / Payment Methods / Transactions** (CRUD + แยกข้อความ + อัปโหลดรูป-เสียง) | **1–5** |
+| **Coder 2 — _[ชื่อเพื่อน]_** | งบประมาณ + รายงาน + การเชื่อมต่อภายนอก | **Budgets / Auto-log / Reminders** + Scheduler, **Reports + งบกำไรขาดทุน (P&L)**, **Export** CSV/Excel, **POS** ingestion API, **LINE** webhook | **6–9** |
+
+### รายการงาน Backend (Task Breakdown & Status)
+
+**Coder 1 — Kanthi**
+- [x] **1.** วางโครงโปรเจกต์ + ติดตั้ง dependencies
+- [x] **2.** พิสูจน์ว่า stack รันได้จริง (Prisma + Express + SQLite vertical slice)
+- [x] **3.** Prisma schema เต็มรูปแบบ + seed ข้อมูลภาษาไทย (ร้านเดโม, 14 หมวดหมู่, 4 ช่องทางจ่าย, ธุรกรรมตัวอย่าง, งบ)
+- [x] **4.** Core libs: ตัวแยกข้อความไทย (`parser.ts`) + ตัวคำนวณรอบวันที่ (`period.ts`)
+- [x] **5.** โมดูล Categories / Payment Methods / Transactions (CRUD + `/parse` + `/upload`)
+
+> ✅ **ส่วนของ Coder 1 (tasks 1–5) เสร็จและทดสอบผ่านแล้ว** — parser 7/7 ผ่าน · smoke test ทุก endpoint ผ่าน
+
+**Coder 2 — _[ชื่อเพื่อน]_**
+- [ ] **6.** Budgets + Auto-log (≤ 20 รายการ) + Reminders + Scheduler (node-cron)
+- [ ] **7.** Reports (รายเดือน/สัปดาห์/วัน + กราฟ) + P&L กำไรสุทธิ + Export CSV/Excel
+- [ ] **8.** POS ingestion (REST API) + LINE webhook (ตรวจ signature + ตอบกลับภาษาไทย)
+- [ ] **9.** รวมระบบ + ทดสอบ end-to-end ทั้งหมด + เอกสารสรุป
+
+> 💻 โค้ด Backend (MVP) อยู่ในโฟลเดอร์ **[`/backend`](./backend)** — Stack: **TypeScript · Express · Prisma + SQLite · LINE Messaging API** · วิธีติดตั้งและรันดูที่ **[`backend/README.md`](./backend/README.md)**

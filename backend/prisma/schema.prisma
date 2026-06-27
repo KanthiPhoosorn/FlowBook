@@ -1,0 +1,165 @@
+// FlowBook backend data model.
+// Tenant = Shop. Note: SQLite does not support Prisma enums, so status/kind/type
+// fields are plain strings with the allowed values documented inline.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Shop {
+  id              String   @id @default(cuid())
+  name            String
+  plan            String   @default("PRO") // FREE | PRO
+  timezone        String   @default("Asia/Bangkok")
+  budgetStartDay  Int      @default(1) // day-of-month a MONTHLY budget cycle starts (1-28)
+  reminderEnabled Boolean  @default(true)
+  reminderTime    String   @default("20:00") // HH:mm local time for the daily "remember to log" nudge
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  staff          StaffUser[]
+  categories     Category[]
+  paymentMethods PaymentMethod[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  autoLogRules   AutoLogRule[]
+}
+
+// LINE users (shop staff) mapped to a shop, so a LINE message can be attributed.
+model StaffUser {
+  id           String        @id @default(cuid())
+  shopId       String
+  shop         Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  lineUserId   String        @unique
+  displayName  String?
+  role         String        @default("STAFF") // OWNER | STAFF
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+
+  @@index([shopId])
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  shopId       String
+  shop         Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name         String
+  type         String // INCOME | EXPENSE
+  icon         String?
+  color        String?
+  keywords     String? // comma-separated Thai/English keywords used by the text parser
+  isDefault    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+  budgets      Budget[]
+  autoLogRules AutoLogRule[]
+
+  @@unique([shopId, name, type])
+  @@index([shopId])
+}
+
+model PaymentMethod {
+  id           String        @id @default(cuid())
+  shopId       String
+  shop         Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name         String
+  kind         String        @default("CASH") // CASH | BANK | CREDIT | EWALLET
+  keywords     String?
+  isDefault    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+  autoLogRules AutoLogRule[]
+
+  @@unique([shopId, name])
+  @@index([shopId])
+}
+
+model Transaction {
+  id              String         @id @default(cuid())
+  shopId          String
+  shop            Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  type            String // INCOME | EXPENSE
+  amount          Float
+  categoryId      String?
+  category        Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  staffUserId     String?
+  staffUser       StaffUser?     @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  note            String?
+  source          String         @default("MANUAL") // MANUAL | TEXT | IMAGE | SLIP | VOICE | AUTO | POS | API
+  externalRef     String? // e.g. POS receipt id, for [shopId + date] reconciliation
+  occurredAt      DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  attachments     Attachment[]
+  saleItems       SaleItem[]
+
+  @@index([shopId, occurredAt])
+  @@index([shopId, type])
+}
+
+// POS line items (รายการ, จำนวน, ราคา) attached to an INCOME transaction.
+model SaleItem {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  name          String
+  qty           Int         @default(1)
+  unitPrice     Float
+
+  @@index([transactionId])
+}
+
+// Receipt image / slip / voice note attached to a transaction.
+model Attachment {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  kind          String // IMAGE | SLIP | VOICE
+  path          String?
+  parsedText    String? // OCR/ASR text the entry was derived from
+  createdAt     DateTime    @default(now())
+
+  @@index([transactionId])
+}
+
+model Budget {
+  id         String    @id @default(cuid())
+  shopId     String
+  shop       Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  categoryId String? // null = overall budget across all categories
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  period     String    @default("MONTHLY") // DAILY | WEEKLY | MONTHLY
+  amount     Float
+  startDate  DateTime? // custom cycle start; falls back to shop.budgetStartDay / period default
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+
+  @@index([shopId])
+}
+
+model AutoLogRule {
+  id              String         @id @default(cuid())
+  shopId          String
+  shop            Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  type            String // INCOME | EXPENSE
+  amount          Float
+  categoryId      String?
+  category        Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  note            String?
+  frequency       String         @default("MONTHLY") // DAILY | WEEKLY | MONTHLY
+  dayOfWeek       Int? // 0-6 (Sun-Sat) for WEEKLY
+  dayOfMonth      Int? // 1-28 for MONTHLY
+  time            String         @default("09:00") // HH:mm local time to fire
+  active          Boolean        @default(true)
+  lastRunAt       DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([shopId])
+}
