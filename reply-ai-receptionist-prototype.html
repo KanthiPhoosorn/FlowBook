@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reply · AI Receptionist สำหรับคลินิกสัตวแพทย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #4a5568;
+    --ink-muted: #718096;
+    --paper: #FAFAF7;
+    --paper-2: #F2EFE8;
+    --paper-3: #EBE7DC;
+    --rule: #E0DBCD;
+    --primary: #0F4C5C;
+    --primary-light: #1F6B7E;
+    --primary-soft: #E0F2F1;
+    --accent: #C44536;
+    --accent-soft: #FAE5DD;
+    --success: #2A9D8F;
+    --success-soft: #D1F0EC;
+    --warning: #D69E2E;
+    --warning-soft: #FCEFC8;
+    --info: #3B82A0;
+    --info-soft: #DDE9EE;
+
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 16px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .display {
+    font-family: 'Instrument Serif', 'IBM Plex Sans Thai', serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-feature-settings: "tnum";
+  }
+
+  /* ============ LAYOUT ============ */
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    background: var(--paper-2);
+    border-right: 1px solid var(--rule);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 6px 22px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 18px;
+  }
+  .brand-mark {
+    width: 36px; height: 36px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 9px;
+    display: grid; place-items: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-style: italic;
+    line-height: 1;
+  }
+  .brand-text h1 {
+    margin: 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .brand-text small {
+    color: var(--ink-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  .nav-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .nav-item {
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 9px 11px;
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    transition: background 0.12s;
+  }
+  .nav-item:hover { background: rgba(15,76,92,0.06); }
+  .nav-item.active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+  .nav-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--ink-muted);
+    padding: 12px 11px 6px;
+    font-weight: 600;
+  }
+
+  .sidebar-foot {
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .clinic-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 11px 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .clinic-card .pic {
+    width: 32px; height: 32px;
+    background: var(--accent-soft);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+  }
+  .clinic-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .clinic-card-info b {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .clinic-card-info small {
+    font-size: 10.5px;
+    color: var(--ink-muted);
+  }
+
+  /* ============ MAIN ============ */
+  main {
+    min-width: 0;
+    padding: 22px 32px 48px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+  }
+  .topbar h2 {
+    margin: 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+    line-height: 1.05;
+  }
+  .topbar p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .ai-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    padding: 6px 6px 6px 14px;
+    border-radius: 100px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    position: relative;
+  }
+  .status-dot.active::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--success);
+    opacity: 0.3;
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  .ai-status-pill .text {
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .ai-status-pill .text small {
+    display: block;
+    color: var(--ink-muted);
+    font-size: 10.5px;
+    font-weight: 400;
+  }
+
+  .toggle {
+    width: 36px;
+    height: 20px;
+    background: #d1d5db;
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 0;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.15s;
+  }
+  .toggle.on { background: var(--success); }
+  .toggle.on::after { left: 18px; }
+
+  /* ============ VIEW SYSTEM ============ */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.2s ease-out; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ DASHBOARD ============ */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 18px 18px 16px;
+  }
+  .stat-card .label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .stat-card .value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: -1.5px;
+    color: var(--ink);
+  }
+  .stat-card .value small {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .stat-card .delta {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .stat-card .delta.up { color: var(--success); }
+  .stat-card .delta.down { color: var(--accent); }
+  .stat-card.featured {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card.featured .label { color: rgba(250,250,247,0.65); }
+  .stat-card.featured .value { color: var(--paper); }
+  .stat-card.featured .value small { color: rgba(250,250,247,0.65); }
+  .stat-card.featured .delta { color: rgba(250,250,247,0.85); }
+  .stat-card.featured::after {
+    content: '';
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(42,157,143,0.25);
+  }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 18px;
+  }
+
+  .panel {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .panel-head {
+    padding: 16px 18px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel-head h3 {
+    margin: 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .panel-head .meta {
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-head .meta .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+  .panel-body {
+    padding: 8px 0;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  /* ============ TIMELINE (signature element) ============ */
+  .timeline {
+    padding: 14px 18px 18px;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 60px 24px 1fr;
+    gap: 0;
+    padding: 0;
+    position: relative;
+    min-height: 56px;
+  }
+  .timeline-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    padding-top: 2px;
+    text-align: right;
+    padding-right: 14px;
+  }
+  .timeline-spine {
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+  .timeline-spine::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+    transform: translateX(-50%);
+  }
+  .timeline-spine .node {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    margin-top: 5px;
+    position: relative;
+    z-index: 1;
+  }
+  .timeline-item.has-event .node {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .timeline-item.in-progress .node {
+    background: var(--success);
+    border-color: var(--success);
+    box-shadow: 0 0 0 4px var(--success-soft);
+  }
+  .timeline-card-wrap {
+    padding-left: 14px;
+    padding-bottom: 10px;
+  }
+  .timeline-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .timeline-card:hover {
+    border-color: var(--ink);
+    background: white;
+  }
+  .timeline-card .row1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+  .timeline-card .pet-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .timeline-card .pet-name .emoji {
+    margin-right: 4px;
+  }
+  .timeline-card .duration {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .timeline-card .row2 {
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .timeline-card .row2 .dot-sep { color: var(--ink-muted); }
+  .timeline-card .row3 {
+    margin-top: 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .badge.confirmed { background: var(--info-soft); color: var(--info); }
+  .badge.in-progress { background: var(--success-soft); color: var(--success); }
+  .badge.waiting { background: var(--warning-soft); color: var(--warning); }
+  .badge.cancelled { background: var(--accent-soft); color: var(--accent); }
+  .badge.new { background: var(--paper-2); color: var(--ink-soft); }
+  .badge.pending { background: var(--accent-soft); color: var(--accent); }
+  .badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .doctor-tag {
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .timeline-empty {
+    grid-column: 3;
+    color: var(--ink-muted);
+    font-size: 11.5px;
+    padding: 4px 0 0 14px;
+    font-style: italic;
+  }
+
+  .day-break {
+    grid-column: 1 / -1;
+    padding: 10px 0 6px 60px;
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+  }
+
+  /* ============ AI ACTIVITY FEED ============ */
+  .activity-feed {
+    padding: 0;
+  }
+  .activity-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    transition: background 0.12s;
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .activity-item:hover { background: var(--paper); }
+  .activity-item:last-child { border-bottom: 0; }
+  .activity-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: var(--paper);
+    flex-shrink: 0;
+  }
+  .activity-icon.call { background: var(--primary); }
+  .activity-icon.line { background: #06C755; }
+  .activity-icon.pending {
+    background: var(--warning);
+    position: relative;
+  }
+  .activity-icon svg { width: 14px; height: 14px; }
+  .activity-content { min-width: 0; }
+  .activity-row1 {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .activity-row1 .channel {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .activity-row2 {
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .activity-snippet {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .activity-outcome {
+    margin-top: 6px;
+  }
+  .activity-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  /* ============ SCHEDULE VIEW ============ */
+  .schedule-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .date-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 4px;
+  }
+  .date-nav button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    font-size: 16px;
+    color: var(--ink-soft);
+  }
+  .date-nav button:hover { background: var(--paper-2); }
+  .date-nav .current {
+    padding: 0 14px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .date-nav .current small {
+    display: block;
+    font-size: 10px;
+    color: var(--ink-muted);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .view-toggle {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 4px;
+    display: flex;
+    gap: 2px;
+  }
+  .view-toggle button {
+    border: 0;
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .view-toggle button.active {
+    background: var(--ink);
+    color: white;
+  }
+  .btn {
+    border: 0;
+    padding: 9px 16px;
+    border-radius: var(--r);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--primary); }
+  .btn-secondary {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .btn-secondary:hover { background: var(--paper-2); }
+  .btn-accent {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+  }
+  .btn-row { display: flex; gap: 8px; }
+
+  /* ============ PATIENTS ============ */
+  .search-box {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .search-box svg { width: 16px; height: 16px; color: var(--ink-muted); }
+  .search-box input {
+    border: 0;
+    outline: 0;
+    font-family: inherit;
+    font-size: 13.5px;
+    flex: 1;
+    background: transparent;
+    color: var(--ink);
+  }
+  .patient-list {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .patient-row {
+    display: grid;
+    grid-template-columns: 36px 1.4fr 1fr 1fr auto;
+    gap: 14px;
+    padding: 14px 18px;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .patient-row:hover { background: var(--paper); }
+  .patient-row:last-child { border-bottom: 0; }
+  .pet-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--paper-2);
+    display: grid; place-items: center;
+    font-size: 18px;
+  }
+  .patient-pet b { display: block; font-size: 14px; font-weight: 600; }
+  .patient-pet small { font-size: 11.5px; color: var(--ink-muted); }
+  .patient-owner { font-size: 12.5px; color: var(--ink-soft); }
+  .patient-owner small { display: block; font-size: 11px; color: var(--ink-muted); margin-top: 1px; }
+  .patient-last {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .patient-last small {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+
+  /* ============ AI SETTINGS ============ */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .setting-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 18px 20px;
+  }
+  .setting-card h3 {
+    margin: 0 0 6px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .setting-card p {
+    margin: 0 0 16px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+  .field {
+    margin-bottom: 14px;
+  }
+  .field-label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: 0;
+    background: var(--paper);
+    color: var(--ink);
+    resize: vertical;
+  }
+  .field textarea { min-height: 80px; line-height: 1.5; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--ink); }
+  .voice-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .voice-option {
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    cursor: pointer;
+    background: var(--paper);
+    text-align: left;
+    font-family: inherit;
+    transition: all 0.12s;
+  }
+  .voice-option.active {
+    border-color: var(--ink);
+    background: white;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+  }
+  .voice-option b { display: block; font-size: 13px; }
+  .voice-option small { font-size: 11px; color: var(--ink-muted); }
+  .service-list {
+    border-top: 1px solid var(--rule);
+    margin-top: 4px;
+  }
+  .service-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto 24px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .service-row:last-child { border-bottom: 0; }
+  .service-row .name { font-size: 13px; font-weight: 500; }
+  .service-row .meta { font-size: 11.5px; color: var(--ink-muted); }
+  .service-row .price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .icon-btn {
+    width: 24px; height: 24px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink-muted);
+    border-radius: 4px;
+  }
+  .icon-btn:hover { background: var(--paper-2); color: var(--ink); }
+  .add-row {
+    padding: 12px 0 4px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px dashed var(--rule);
+    margin-top: 4px;
+  }
+  .text-link {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--ink-muted);
+    background: 0;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 0;
+  }
+  .hours-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 6px 12px;
+    align-items: center;
+  }
+  .hours-grid .day { font-size: 12.5px; font-weight: 500; }
+  .hours-grid input { padding: 6px 10px; font-size: 12px; }
+
+  /* ============ REPORTS ============ */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .report-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 18px;
+  }
+  .report-card .label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .report-card .value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -1.2px;
+  }
+  .report-card .value small {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-left: 4px;
+  }
+  .report-card .sub {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .bar-chart {
+    margin-top: 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 60px;
+  }
+  .bar {
+    flex: 1;
+    background: var(--paper-2);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+  }
+  .bar.active { background: var(--ink); }
+  .bar-labels {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-muted);
+  }
+  .bar-labels span { flex: 1; text-align: center; }
+
+  .faq-list {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .faq-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .faq-row:last-child { border-bottom: 0; }
+  .faq-rank {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+  .faq-q { font-size: 13px; font-weight: 500; }
+  .faq-q small { display: block; font-size: 11.5px; color: var(--ink-muted); font-weight: 400; margin-top: 2px; }
+  .faq-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  /* ============ TEST AI FAB ============ */
+  .test-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: white;
+    border: 0;
+    padding: 13px 20px;
+    border-radius: 100px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    z-index: 50;
+  }
+  .test-fab:hover { background: var(--primary); }
+  .test-fab .icon-pulse {
+    width: 18px; height: 18px;
+    position: relative;
+  }
+  .test-fab .icon-pulse svg { width: 100%; height: 100%; }
+
+  /* ============ SHEETS / MODALS ============ */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,76,92,0.35);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .sheet {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 500px;
+    background: var(--paper);
+    z-index: 110;
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+  }
+  .sheet.open { transform: translateX(0); }
+  .sheet-head {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .sheet-head h3 {
+    margin: 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .sheet-head small {
+    color: var(--ink-muted);
+    font-size: 11.5px;
+  }
+  .sheet-close {
+    width: 32px; height: 32px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 20px;
+    color: var(--ink-muted);
+  }
+  .sheet-close:hover { background: var(--paper-2); }
+  .sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .sheet-foot {
+    padding: 14px 24px;
+    border-top: 1px solid var(--rule);
+    background: white;
+    flex-shrink: 0;
+  }
+
+  /* Transcript */
+  .transcript-meta {
+    background: var(--paper-2);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .transcript-meta .meta-item .l {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .transcript-meta .meta-item .v {
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .transcript-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tline {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 10px;
+  }
+  .tline .speaker {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-top: 7px;
+    text-align: right;
+  }
+  .tline.ai .speaker { color: var(--primary); }
+  .tline.cust .speaker { color: var(--ink-muted); }
+  .tline .bubble {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 8px 12px;
+    border-radius: var(--r);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .tline.ai .bubble {
+    background: var(--primary-soft);
+    border-color: var(--primary-soft);
+  }
+
+  .outcome-banner {
+    margin: 18px 0;
+    padding: 14px 16px;
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .outcome-banner.success {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+  .outcome-banner.info {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+  .outcome-banner.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+  .outcome-banner .icon { font-size: 18px; }
+  .outcome-banner b { font-size: 13.5px; }
+  .outcome-banner small { display: block; font-size: 12px; opacity: 0.9; margin-top: 1px; }
+
+  /* Test AI sheet */
+  .test-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .test-msg {
+    max-width: 80%;
+    padding: 9px 13px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .test-msg.ai {
+    background: var(--primary-soft);
+    color: var(--ink);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .test-msg.user {
+    background: var(--ink);
+    color: var(--paper);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .test-input-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .test-input-bar input {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 13.5px;
+    outline: 0;
+  }
+  .test-input-bar input:focus { border-color: var(--ink); }
+  .test-quick {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .test-quick button {
+    background: var(--paper-2);
+    border: 0;
+    padding: 5px 11px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .test-quick button:hover { background: var(--paper-3); }
+
+  /* Appointment sheet */
+  .appt-detail-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .appt-pet-large {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .appt-pet-large .ava {
+    width: 56px; height: 56px;
+    background: var(--paper-2);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 28px;
+  }
+  .appt-pet-large h4 {
+    margin: 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .appt-pet-large small { font-size: 12px; color: var(--ink-muted); }
+  .appt-kv {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 6px 14px;
+    font-size: 13px;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .appt-kv .k {
+    color: var(--ink-muted);
+    font-weight: 500;
+  }
+  .appt-kv .v {
+    font-weight: 500;
+  }
+  .appt-history h5 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0 0 10px;
+  }
+  .history-item {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+  .history-item .date {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-muted);
+    font-size: 11.5px;
+  }
+  .history-item .what b { font-weight: 600; }
+  .history-item .what small { display: block; color: var(--ink-muted); margin-top: 1px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Empty states */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  /* Helper */
+  .row-flex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .grow { flex: 1; }
+  .mt-12 { margin-top: 12px; }
+  .mt-18 { margin-top: 18px; }
+  .mb-0 { margin-bottom: 0 !important; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .panel-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .reports-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      height: auto;
+      width: 100%;
+      background: white;
+      border-right: 0;
+      border-top: 1px solid var(--rule);
+      flex-direction: row;
+      padding: 8px 12px env(safe-area-inset-bottom, 8px);
+      z-index: 50;
+    }
+    .brand, .sidebar-foot { display: none; }
+    .nav-section {
+      flex-direction: row;
+      justify-content: space-around;
+      gap: 0;
+    }
+    .nav-label { display: none; }
+    .nav-item {
+      flex-direction: column;
+      gap: 3px;
+      padding: 6px 8px;
+      font-size: 10px;
+      flex: 1;
+      text-align: center;
+      justify-content: center;
+    }
+    .nav-item.active {
+      background: transparent;
+      color: var(--ink);
+    }
+    .nav-item.active svg { color: var(--ink); }
+    .nav-item:not(.active) svg { color: var(--ink-muted); }
+    main {
+      padding: 18px 16px 100px;
+    }
+    .topbar { flex-direction: column; align-items: flex-start; }
+    .topbar h2 { font-size: 26px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card { padding: 14px; }
+    .stat-card .value { font-size: 32px; }
+    .test-fab { bottom: 80px; right: 16px; padding: 11px 16px; font-size: 12px; }
+    .sheet { max-width: 100%; }
+    .patient-row { grid-template-columns: 36px 1fr auto; gap: 10px; }
+    .patient-row .patient-owner, .patient-row .patient-last { display: none; }
+    .hours-grid { grid-template-columns: 60px 1fr 1fr; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- =========== SIDEBAR =========== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">R</div>
+      <div class="brand-text">
+        <h1>Reply</h1>
+        <small>AI Receptionist</small>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">การทำงาน</div>
+      <button class="nav-item active" data-view="dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        หน้าหลัก
+      </button>
+      <button class="nav-item" data-view="schedule">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        คิวนัด
+      </button>
+      <button class="nav-item" data-view="patients">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        คนไข้
+      </button>
+
+      <div class="nav-label">ตั้งค่าและรายงาน</div>
+      <button class="nav-item" data-view="ai">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        ตั้งค่า AI
+      </button>
+      <button class="nav-item" data-view="reports">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        รายงาน
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="clinic-card">
+        <div class="pic">🐾</div>
+        <div class="clinic-card-info">
+          <b>คลินิกสัตวแพทย์ใจดี</b>
+          <small>คุณหมอวรา · OWNER</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========== MAIN =========== -->
+  <main>
+    <div class="topbar">
+      <div>
+        <h2 id="viewTitle">หน้าหลัก</h2>
+        <p id="viewSubtitle">ภาพรวมวันนี้ · จันทร์ 30 มิถุนายน 2569</p>
+      </div>
+      <div class="ai-status-pill" id="aiStatusPill">
+        <div class="status-dot active" id="statusDot"></div>
+        <div class="text">
+          <div id="aiStatusText">AI กำลังทำงาน</div>
+          <small id="aiStatusSub">รับสายอัตโนมัติ 24 ชม.</small>
+        </div>
+        <button class="toggle on" id="aiToggle"></button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="dashboardView">
+      <div class="stats-grid">
+        <div class="stat-card featured">
+          <div class="label">AI รับสายวันนี้</div>
+          <div class="value" id="aiCallsToday">14</div>
+          <div class="delta">▲ จองสำเร็จ 9 ครั้ง · เพิ่ม 28% จากเมื่อวาน</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">คิวนัดวันนี้</div>
+          <div class="value">12<small>คิว</small></div>
+          <div class="delta">9 confirmed · 2 รอ · 1 cancelled</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">รอตรวจสอบ</div>
+          <div class="value" style="color: var(--accent)">3</div>
+          <div class="delta down">AI ไม่กล้าตัดสิน · ทีมต้องเช็ค</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">รายได้คาดการณ์</div>
+          <div class="value">8,600<small>บาท</small></div>
+          <div class="delta up">▲ จากคิว 12 รายการ</div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <!-- Schedule timeline -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>คิววันนี้</h3>
+            <div class="meta">
+              <span class="dot"></span>
+              ตอนนี้ 14:30
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="timeline" id="timeline"></div>
+          </div>
+        </div>
+
+        <!-- AI activity feed -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>AI ทำอะไรไปบ้าง</h3>
+            <div class="meta">
+              <span class="dot"></span>
+              สด · อัปเดต real-time
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="activity-feed" id="activityFeed"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE VIEW -->
+    <section class="view" id="scheduleView">
+      <div class="schedule-controls">
+        <div class="date-nav">
+          <button>‹</button>
+          <div class="current">
+            จันทร์ 30 มิ.ย.
+            <small>วันนี้</small>
+          </div>
+          <button>›</button>
+        </div>
+        <div class="view-toggle">
+          <button class="active">วัน</button>
+          <button>สัปดาห์</button>
+          <button>เดือน</button>
+        </div>
+        <div class="grow"></div>
+        <button class="btn btn-primary">+ จองคิวเอง</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>ตารางคิว · 30 มิถุนายน</h3>
+          <div class="meta">12 คิว · 9 confirmed · 2 รอ · 1 cancelled</div>
+        </div>
+        <div class="panel-body" style="max-height: none;">
+          <div class="timeline" id="timelineFull"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PATIENTS VIEW -->
+    <section class="view" id="patientsView">
+      <div class="search-box">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="patientSearch" placeholder="ค้นหาน้อง หรือชื่อเจ้าของ...">
+      </div>
+
+      <div class="patient-list" id="patientList"></div>
+    </section>
+
+    <!-- AI SETTINGS VIEW -->
+    <section class="view" id="aiView">
+      <div class="settings-grid">
+        <!-- AI Personality -->
+        <div class="setting-card">
+          <h3>บุคลิก AI</h3>
+          <p>กำหนดชื่อ น้ำเสียง และวิธีพูดของ AI ที่จะรับสายแทนคุณ</p>
+
+          <div class="field">
+            <label class="field-label">ชื่อ AI</label>
+            <input type="text" value="ใบบัว" id="aiName">
+          </div>
+
+          <div class="field">
+            <label class="field-label">เสียง</label>
+            <div class="voice-picker">
+              <button class="voice-option active" data-voice="f1">
+                <b>หญิง 1</b>
+                <small>นุ่มนวล สดใส</small>
+              </button>
+              <button class="voice-option" data-voice="f2">
+                <b>หญิง 2</b>
+                <small>มืออาชีพ น่าเชื่อถือ</small>
+              </button>
+              <button class="voice-option" data-voice="m1">
+                <b>ชาย 1</b>
+                <small>อบอุ่น เป็นมิตร</small>
+              </button>
+              <button class="voice-option" data-voice="m2">
+                <b>ชาย 2</b>
+                <small>นิ่ง สุภาพ</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">ประโยคทักทาย</label>
+            <textarea>สวัสดีค่ะ คลินิกสัตวแพทย์ใจดี ดิฉัน "ใบบัว" รับสายแทนหมอนะคะ มีอะไรให้ช่วยคะ</textarea>
+          </div>
+
+          <button class="text-link">+ ปรับ prompt ขั้นสูง</button>
+        </div>
+
+        <!-- Services -->
+        <div class="setting-card">
+          <h3>บริการที่ AI รับจองได้</h3>
+          <p>AI จะรับจองเฉพาะบริการในรายการนี้ และใช้ราคา/ระยะเวลาด้านล่างในการตอบลูกค้า</p>
+
+          <div class="service-list" id="serviceList"></div>
+
+          <div class="add-row">
+            <button class="text-link" id="addServiceBtn">+ เพิ่มบริการใหม่</button>
+          </div>
+        </div>
+
+        <!-- Operating hours -->
+        <div class="setting-card">
+          <h3>เวลาเปิดทำการ</h3>
+          <p>AI จะไม่นัดคิวนอกเวลานี้ และจะแจ้งให้ลูกค้าโทรกลับวันถัดไป</p>
+
+          <div class="hours-grid">
+            <span class="day">จันทร์</span><input type="time" value="09:00"><input type="time" value="18:00">
+            <span class="day">อังคาร</span><input type="time" value="09:00"><input type="time" value="18:00">
+            <span class="day">พุธ</span><input type="time" value="09:00"><input type="time" value="18:00">
+            <span class="day">พฤหัส</span><input type="time" value="09:00"><input type="time" value="18:00">
+            <span class="day">ศุกร์</span><input type="time" value="09:00"><input type="time" value="18:00">
+            <span class="day">เสาร์</span><input type="time" value="10:00"><input type="time" value="16:00">
+            <span class="day" style="color:var(--ink-muted)">อาทิตย์</span><span style="font-size:12px;color:var(--ink-muted)">ปิด</span><span></span>
+          </div>
+        </div>
+
+        <!-- Smart routing -->
+        <div class="setting-card">
+          <h3>กฎความปลอดภัย</h3>
+          <p>ตั้งกรณีที่ AI ควร "ขอตรวจสอบจากทีมก่อน" แทนที่จะตัดสินเอง</p>
+
+          <div class="field" style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:14px">
+            <div style="flex:1">
+              <b style="font-size:13px">เคสฉุกเฉิน (Emergency)</b>
+              <div style="font-size:11.5px; color:var(--ink-muted); margin-top:3px; line-height:1.45">เมื่อลูกค้าบอกว่าน้องป่วยหนัก/บาดเจ็บ — โอนสายต่อให้คนรับทันที</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <div class="field" style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:14px">
+            <div style="flex:1">
+              <b style="font-size:13px">บริการนอกรายการ</b>
+              <div style="font-size:11.5px; color:var(--ink-muted); margin-top:3px; line-height:1.45">ลูกค้าถามบริการที่ไม่มีในระบบ — pending รอตรวจ ไม่ตัดสินเอง</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+
+          <div class="field" style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:0">
+            <div style="flex:1">
+              <b style="font-size:13px">ขอเลื่อน/ยกเลิกใกล้เวลา</b>
+              <div style="font-size:11.5px; color:var(--ink-muted); margin-top:3px; line-height:1.45">ขอเลื่อน &lt; 2 ชม. ก่อนนัด — pending รอตรวจ</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS VIEW -->
+    <section class="view" id="reportsView">
+      <div class="schedule-controls" style="margin-bottom: 20px">
+        <div class="view-toggle">
+          <button>วันนี้</button>
+          <button class="active">7 วัน</button>
+          <button>30 วัน</button>
+        </div>
+        <div class="grow"></div>
+        <button class="btn btn-secondary">ดาวน์โหลด report</button>
+      </div>
+
+      <div class="reports-grid">
+        <div class="report-card">
+          <div class="label">สายเข้าทั้งหมด</div>
+          <div class="value">87<small>สาย</small></div>
+          <div class="sub">เฉลี่ย 12.4 สาย/วัน</div>
+          <div class="bar-chart">
+            <div class="bar" style="height: 40%"></div>
+            <div class="bar" style="height: 65%"></div>
+            <div class="bar" style="height: 80%"></div>
+            <div class="bar" style="height: 55%"></div>
+            <div class="bar" style="height: 70%"></div>
+            <div class="bar" style="height: 90%"></div>
+            <div class="bar active" style="height: 75%"></div>
+          </div>
+          <div class="bar-labels"><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span><span>วันนี้</span></div>
+        </div>
+        <div class="report-card">
+          <div class="label">AI จองสำเร็จ</div>
+          <div class="value">71%<small></small></div>
+          <div class="sub">62 จาก 87 สาย</div>
+          <div class="bar-chart">
+            <div class="bar" style="height: 60%"></div>
+            <div class="bar" style="height: 70%"></div>
+            <div class="bar" style="height: 65%"></div>
+            <div class="bar" style="height: 75%"></div>
+            <div class="bar" style="height: 80%"></div>
+            <div class="bar" style="height: 85%"></div>
+            <div class="bar active" style="height: 72%"></div>
+          </div>
+          <div class="bar-labels"><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span><span>วันนี้</span></div>
+        </div>
+        <div class="report-card">
+          <div class="label">no-show rate</div>
+          <div class="value">8%<small></small></div>
+          <div class="sub" style="color: var(--success)">▼ ลดลง 4% จากก่อนใช้ AI</div>
+          <div class="bar-chart">
+            <div class="bar" style="height: 50%"></div>
+            <div class="bar" style="height: 45%"></div>
+            <div class="bar" style="height: 35%"></div>
+            <div class="bar" style="height: 30%"></div>
+            <div class="bar" style="height: 25%"></div>
+            <div class="bar" style="height: 30%"></div>
+            <div class="bar active" style="height: 20%"></div>
+          </div>
+          <div class="bar-labels"><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span><span>วันนี้</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>คำถามยอดฮิตที่ลูกค้าถามมา</h3>
+          <div class="meta">7 วันที่ผ่านมา</div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div class="faq-list">
+            <div class="faq-row">
+              <div class="faq-rank">01</div>
+              <div class="faq-q">"ฉีดวัคซีนน้องราคาเท่าไหร่?"<small>AI ตอบเอง ถูก 100%</small></div>
+              <div class="faq-count">28 ครั้ง</div>
+            </div>
+            <div class="faq-row">
+              <div class="faq-rank">02</div>
+              <div class="faq-q">"พรุ่งนี้มีคิวว่างไหม?"<small>AI ตอบเอง ถูก 96%</small></div>
+              <div class="faq-count">22 ครั้ง</div>
+            </div>
+            <div class="faq-row">
+              <div class="faq-rank">03</div>
+              <div class="faq-q">"คลินิกเปิดถึงกี่โมง?"<small>AI ตอบเอง ถูก 100%</small></div>
+              <div class="faq-count">17 ครั้ง</div>
+            </div>
+            <div class="faq-row">
+              <div class="faq-rank">04</div>
+              <div class="faq-q">"น้องท้องเสีย ตรวจไหม?"<small style="color:var(--warning)">⚠ pending รอตรวจสอบ</small></div>
+              <div class="faq-count">11 ครั้ง</div>
+            </div>
+            <div class="faq-row">
+              <div class="faq-rank">05</div>
+              <div class="faq-q">"ทำหมันราคารวมยาฉีดไหม?"<small>AI ตอบเอง ถูก 91%</small></div>
+              <div class="faq-count">9 ครั้ง</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- =========== FAB =========== -->
+<button class="test-fab" id="testFab">
+  <div class="icon-pulse">
+    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </div>
+  ทดสอบคุยกับ AI
+</button>
+
+<!-- =========== SHEETS =========== -->
+<div class="backdrop" id="backdrop"></div>
+
+<div class="sheet" id="transcriptSheet">
+  <div class="sheet-head">
+    <div>
+      <h3>บทสนทนา</h3>
+      <small id="transcriptMeta">—</small>
+    </div>
+    <button class="sheet-close" data-close>×</button>
+  </div>
+  <div class="sheet-body" id="transcriptBody"></div>
+  <div class="sheet-foot">
+    <div class="btn-row">
+      <button class="btn btn-secondary" data-close>ปิด</button>
+      <button class="btn btn-primary grow" id="confirmActionBtn">ยืนยันการจอง</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="appointmentSheet">
+  <div class="sheet-head">
+    <div>
+      <h3>รายละเอียดนัด</h3>
+      <small id="apptMeta">—</small>
+    </div>
+    <button class="sheet-close" data-close>×</button>
+  </div>
+  <div class="sheet-body" id="appointmentBody"></div>
+  <div class="sheet-foot">
+    <div class="btn-row">
+      <button class="btn btn-secondary">เลื่อนนัด</button>
+      <button class="btn btn-secondary">ยกเลิก</button>
+      <button class="btn btn-primary grow">เริ่มตรวจ</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="patientSheet">
+  <div class="sheet-head">
+    <div>
+      <h3>ประวัติคนไข้</h3>
+      <small id="patientMeta">—</small>
+    </div>
+    <button class="sheet-close" data-close>×</button>
+  </div>
+  <div class="sheet-body" id="patientBody"></div>
+  <div class="sheet-foot">
+    <button class="btn btn-primary" style="width:100%">+ จองนัดใหม่</button>
+  </div>
+</div>
+
+<div class="sheet" id="testSheet">
+  <div class="sheet-head">
+    <div>
+      <h3>ทดสอบคุยกับ AI</h3>
+      <small>เห็นว่า AI จะตอบลูกค้ายังไงก่อนเปิดใช้จริง</small>
+    </div>
+    <button class="sheet-close" data-close>×</button>
+  </div>
+  <div class="sheet-body" id="testBody">
+    <div class="test-quick" id="testQuick">
+      <button>"ฉีดวัคซีนเท่าไหร่"</button>
+      <button>"พรุ่งนี้บ่ายมีคิวไหม"</button>
+      <button>"น้องท้องเสีย ทำไงดี"</button>
+      <button>"เปิดถึงกี่โมง"</button>
+    </div>
+    <div class="test-chat" id="testChat"></div>
+  </div>
+  <div class="sheet-foot">
+    <div class="test-input-bar">
+      <input id="testInput" placeholder="พิมพ์ข้อความเหมือนเป็นลูกค้า...">
+      <button class="btn btn-primary" id="testSendBtn">ส่ง</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// MOCK DATA
+// ============================================================
+const APPOINTMENTS = [
+  { id: 'a1', time: '09:00', duration: 30, petName: 'น้องก้อน', emoji: '🐱', ownerName: 'คุณสมชาย', service: 'ฉีดวัคซีน', doctor: 'หมอวรา', status: 'completed', source: 'walkin', price: 600 },
+  { id: 'a2', time: '10:00', duration: 60, petName: 'น้องโมจิ', emoji: '🐕', ownerName: 'คุณวาริน', service: 'ตรวจสุขภาพประจำปี', doctor: 'หมอนัท', status: 'completed', source: 'ai-call', price: 1200 },
+  { id: 'a3', time: '11:00', duration: 30, petName: 'น้องช้อกโก', emoji: '🐱', ownerName: 'คุณอิม', service: 'ตัดเล็บ + ทำความสะอาดหู', doctor: 'หมอวรา', status: 'completed', source: 'ai-line', price: 350 },
+  { id: 'a4', time: '13:30', duration: 90, petName: 'น้องบราวนี่', emoji: '🐕', ownerName: 'คุณเพชร', service: 'ทำหมัน', doctor: 'หมอวรา', status: 'in-progress', source: 'ai-call', price: 2500, notes: 'แพ้ยา Penicillin · เคยมีประวัติชักหลังวางยา' },
+  { id: 'a5', time: '14:30', duration: 30, petName: 'น้องเทมป์', emoji: '🐱', ownerName: 'คุณเก่ง', service: 'อาบน้ำ-ตัดขน', doctor: 'หมอนัท', status: 'waiting', source: 'ai-call', price: 500 },
+  { id: 'a6', time: '15:00', duration: 60, petName: 'น้องดับเบิ้ล', emoji: '🐕', ownerName: 'คุณฟ้า', service: 'รักษาผิวหนัง', doctor: 'หมอวรา', status: 'confirmed', source: 'walkin', price: 900 },
+  { id: 'a7', time: '16:00', duration: 30, petName: 'น้องคุกกี้', emoji: '🐕', ownerName: 'คุณตุ๊ก', service: 'ตรวจสุขภาพ', doctor: 'หมอนัท', status: 'confirmed', source: 'ai-line', price: 800 },
+  { id: 'a8', time: '16:30', duration: 30, petName: 'น้องลาเต้', emoji: '🐱', ownerName: 'คุณนน', service: 'ฉีดวัคซีน', doctor: 'หมอวรา', status: 'pending', source: 'ai-call', price: 600, notes: 'AI ไม่แน่ใจเรื่องประเภทวัคซีน — รอคุณหมอเช็ค' },
+];
+
+const PATIENTS = [
+  { id: 'p1', petName: 'น้องก้อน', breed: 'แมวเปอร์เซีย', age: '2 ปี', emoji: '🐱', ownerName: 'คุณสมชาย วงศ์รัตน์', phone: '081-234-5678', lastVisit: '30 มิ.ย. 69', visitCount: 8 },
+  { id: 'p2', petName: 'น้องโมจิ', breed: 'โกลเด้น รีทรีฟเวอร์', age: '3 ปี', emoji: '🐕', ownerName: 'คุณวาริน สงวน', phone: '089-555-1234', lastVisit: '30 มิ.ย. 69', visitCount: 12 },
+  { id: 'p3', petName: 'น้องช้อกโก', breed: 'แมวสก็อตติช โฟลด์', age: '1 ปี', emoji: '🐱', ownerName: 'คุณอิม พงศ์', phone: '062-888-7777', lastVisit: '30 มิ.ย. 69', visitCount: 4 },
+  { id: 'p4', petName: 'น้องบราวนี่', breed: 'ปอม', age: '4 ปี', emoji: '🐕', ownerName: 'คุณเพชร สมบูรณ์', phone: '084-111-2222', lastVisit: '30 มิ.ย. 69', visitCount: 15 },
+  { id: 'p5', petName: 'น้องเทมป์', breed: 'แมวไทย', age: '6 ปี', emoji: '🐱', ownerName: 'คุณเก่ง พรหม', phone: '086-333-4444', lastVisit: '15 มิ.ย. 69', visitCount: 22 },
+  { id: 'p6', petName: 'น้องดับเบิ้ล', breed: 'พุดเดิ้ลทอย', age: '2 ปี', emoji: '🐕', ownerName: 'คุณฟ้า ใจดี', phone: '063-555-6666', lastVisit: '22 มิ.ย. 69', visitCount: 6 },
+  { id: 'p7', petName: 'น้องคุกกี้', breed: 'ชิวาว่า', age: '5 ปี', emoji: '🐕', ownerName: 'คุณตุ๊ก สงบ', phone: '081-999-0000', lastVisit: '10 มิ.ย. 69', visitCount: 18 },
+  { id: 'p8', petName: 'น้องลาเต้', breed: 'แมวเปอร์เซีย', age: '1 ปี', emoji: '🐱', ownerName: 'คุณนน อนันต์', phone: '088-444-3333', lastVisit: 'ครั้งแรก', visitCount: 0 },
+];
+
+const ACTIVITIES = [
+  {
+    id: 'ev1', time: '14:32', channel: 'call', icon: 'call',
+    title: 'จองตรวจสุขภาพให้น้องลาเต้',
+    snippet: '"พรุ่งนี้บ่าย 3 ครับ" · AI confirm และส่ง SMS reminder',
+    outcome: 'success', outcomeText: 'จองสำเร็จ · พรุ่งนี้ 15:00',
+    transcript: [
+      { who: 'ai', text: 'สวัสดีค่ะ คลินิกสัตวแพทย์ใจดี ดิฉันใบบัวค่ะ มีอะไรให้ช่วยคะ' },
+      { who: 'cust', text: 'เอ่อ อยากนัดให้แมวมาตรวจสุขภาพหน่อยครับ' },
+      { who: 'ai', text: 'ได้ค่ะ ขอชื่อของน้องและคุณเจ้าของได้ไหมคะ' },
+      { who: 'cust', text: 'น้องลาเต้ครับ ผมชื่อนน' },
+      { who: 'ai', text: 'น้องลาเต้เป็นแมวพันธุ์อะไรคะ อายุประมาณกี่ปีคะ' },
+      { who: 'cust', text: 'เปอร์เซียครับ 1 ปี' },
+      { who: 'ai', text: 'ตอนนี้น้องลาเต้มีอาการอะไรเป็นพิเศษไหมคะ หรือเป็นการตรวจประจำปี' },
+      { who: 'cust', text: 'ตรวจประจำปีครับ ปกติดี' },
+      { who: 'ai', text: 'ค่าตรวจสุขภาพอยู่ที่ 800 บาทค่ะ ใช้เวลาประมาณ 30 นาทีค่ะ ดิฉันเช็คตารางให้ค่ะ พรุ่งนี้บ่าย 3 หรือพฤหัสบ่าย 2 ว่างค่ะ คุณสะดวกเวลาไหนคะ' },
+      { who: 'cust', text: 'พรุ่งนี้บ่าย 3 ครับ' },
+      { who: 'ai', text: 'เรียบร้อยค่ะ จองตรวจสุขภาพให้น้องลาเต้ พรุ่งนี้บ่าย 3 โมงนะคะ ดิฉันส่ง SMS ยืนยันไปที่เบอร์นี้ค่ะ ถ้ามาช้าหรือต้องเลื่อน โทรกลับมาแจ้งได้นะคะ' },
+      { who: 'cust', text: 'ขอบคุณครับ' },
+      { who: 'ai', text: 'ยินดีค่ะ พบกันพรุ่งนี้นะคะ' },
+    ],
+  },
+  {
+    id: 'ev2', time: '14:18', channel: 'line', icon: 'line',
+    title: 'ตอบคำถามราคาฉีดวัคซีน',
+    snippet: 'เจ้าของน้องโอเลี้ยง · AI ตอบราคาวัคซีน 4-in-1 = 600 บาท · ไม่ได้นัด',
+    outcome: 'info', outcomeText: 'ตอบข้อมูล ไม่ได้นัด',
+    transcript: [
+      { who: 'cust', text: 'ฉีดวัคซีนแมวเท่าไหร่คะ' },
+      { who: 'ai', text: 'สวัสดีค่ะ วัคซีนแมวที่นี่มี 2 แบบค่ะ\n\n• วัคซีนรวม 4-in-1 = 600 บาท (FVR, FCV, FPL, FeLV)\n• วัคซีนป้องกันพิษสุนัขบ้า = 200 บาท\n\nรวมแล้วถ้าฉีดทั้งสองตัว = 800 บาทค่ะ ใช้เวลาประมาณ 30 นาที สนใจจองนัดเลยไหมคะ' },
+      { who: 'cust', text: 'ขอคิดดูก่อนนะคะ' },
+      { who: 'ai', text: 'ได้ค่ะ ถ้าตัดสินใจแล้วทักมาที่นี่ได้เลยนะคะ' },
+    ],
+  },
+  {
+    id: 'ev3', time: '13:45', channel: 'call', icon: 'pending',
+    title: 'ขอเลื่อนนัด 2 ชม. ก่อนเวลา',
+    snippet: 'เจ้าของน้องโตเกียว · ลูกค้าอาการป่วยกะทันหัน · AI ไม่กล้าตัดสิน',
+    outcome: 'warning', outcomeText: 'รอทีมตรวจสอบ',
+    transcript: [
+      { who: 'cust', text: 'พี่ครับ ผมขอเลื่อนนัดบ่าย 3 ของน้องโตเกียวได้ไหม ผมเพิ่งไม่สบายอ้วกออกมา' },
+      { who: 'ai', text: 'รับทราบค่ะ เสียใจด้วยกับอาการของคุณ ดิฉันต้องขอแจ้งทีมหมอก่อนนะคะ เพราะเหลือเวลาน้อยกว่า 2 ชั่วโมงก่อนนัด พี่ที่คลินิกจะโทรกลับภายใน 15 นาทีค่ะ ตอนนี้พี่ที่เบอร์เดิมใช่ไหมคะ' },
+      { who: 'cust', text: 'ใช่ครับ' },
+      { who: 'ai', text: 'รับทราบค่ะ พี่หมอจะติดต่อกลับโดยเร็วที่สุดค่ะ' },
+    ],
+  },
+  {
+    id: 'ev4', time: '12:08', channel: 'line', icon: 'line',
+    title: 'ตอบเวลาเปิด-ปิด',
+    snippet: 'AI ตอบ จันทร์-ศุกร์ 9-18 / เสาร์ 10-16 / อาทิตย์ปิด',
+    outcome: 'info', outcomeText: 'ตอบข้อมูลทั่วไป',
+    transcript: [
+      { who: 'cust', text: 'คลินิกเปิดถึงกี่โมงคะ' },
+      { who: 'ai', text: 'เวลาทำการของคลินิกนะคะ\n\n• จันทร์-ศุกร์: 9:00 - 18:00\n• เสาร์: 10:00 - 16:00\n• อาทิตย์: ปิด\n\nสนใจจองนัดเลยไหมคะ' },
+    ],
+  },
+  {
+    id: 'ev5', time: '11:22', channel: 'call', icon: 'call',
+    title: 'จองตัดเล็บให้น้องช้อกโก',
+    snippet: 'เจ้าของน้องช้อกโก โทรเข้า · จองวันนี้ 11:00 - AI confirm ทันที',
+    outcome: 'success', outcomeText: 'จองสำเร็จ · วันนี้ 11:00',
+    transcript: [
+      { who: 'cust', text: 'สวัสดีค่ะ พี่อิมนะคะ พาน้องช้อกโกมาตัดเล็บได้ไหมคะวันนี้' },
+      { who: 'ai', text: 'สวัสดีค่ะคุณอิม ได้แน่นอนค่ะ ตัดเล็บ + ทำความสะอาดหู 350 บาทค่ะ วันนี้ตอน 11:00 น. ว่างค่ะ สะดวกไหมคะ' },
+      { who: 'cust', text: 'สะดวกค่ะ' },
+      { who: 'ai', text: 'เรียบร้อยค่ะ จองให้น้องช้อกโกวันนี้ 11:00 น. ส่ง SMS ยืนยันให้นะคะ' },
+    ],
+  },
+  {
+    id: 'ev6', time: '10:34', channel: 'call', icon: 'pending',
+    title: 'ลูกค้าถามอาการ "น้องท้องเสีย"',
+    snippet: 'AI ไม่ให้คำแนะนำเชิงแพทย์ · แนะนำให้นัดตรวจและรอทีมตอบ',
+    outcome: 'warning', outcomeText: 'รอทีมตรวจสอบ',
+    transcript: [
+      { who: 'cust', text: 'พี่ครับ น้องท้องเสียมา 2 วันแล้ว ควรกินอะไรครับ' },
+      { who: 'ai', text: 'รับทราบค่ะ เรื่องอาการป่วยและการรักษา ดิฉันจะให้คุณหมอเป็นคนตอบนะคะ จะให้โทรกลับใน 30 นาที หรือสะดวกมาตรวจวันนี้คะ' },
+      { who: 'cust', text: 'อาจจะมาตรวจครับ พรุ่งนี้ได้ไหม' },
+      { who: 'ai', text: 'พรุ่งนี้ 10:00 ว่างค่ะ จองคิวให้เลยนะคะ' },
+    ],
+  },
+  {
+    id: 'ev7', time: '09:50', channel: 'line', icon: 'line',
+    title: 'ส่ง reminder นัดพรุ่งนี้',
+    snippet: 'AI ส่ง reminder อัตโนมัติ · แจ้งคุณตุ๊ก ว่าน้องคุกกี้นัด 16:00 พรุ่งนี้',
+    outcome: 'success', outcomeText: 'reminder ส่งแล้ว',
+    transcript: [
+      { who: 'ai', text: 'สวัสดีค่ะคุณตุ๊ก ขอแจ้งเตือนนัดพรุ่งนี้ค่ะ\n\n📅 พรุ่งนี้ 16:00 น.\n🐕 น้องคุกกี้ · ตรวจสุขภาพ\n💵 800 บาท\n\nถ้าต้องเลื่อนหรือยกเลิก ตอบกลับมาได้เลยนะคะ' },
+    ],
+  },
+];
+
+const SERVICES = [
+  { id: 's1', name: 'ฉีดวัคซีน 4-in-1 (แมว)', duration: '30 นาที', price: 600 },
+  { id: 's2', name: 'ฉีดวัคซีนรวม (สุนัข)', duration: '30 นาที', price: 800 },
+  { id: 's3', name: 'ตรวจสุขภาพประจำปี', duration: '60 นาที', price: 1200 },
+  { id: 's4', name: 'ตัดเล็บ + ทำความสะอาดหู', duration: '30 นาที', price: 350 },
+  { id: 's5', name: 'อาบน้ำ-ตัดขน', duration: '60 นาที', price: 500 },
+  { id: 's6', name: 'ทำหมัน (แมว/สุนัขเล็ก)', duration: '90 นาที', price: 2500 },
+  { id: 's7', name: 'รักษาผิวหนัง', duration: '60 นาที', price: 900 },
+];
+
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => el.querySelectorAll(s);
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function openSheet(id) {
+  $('#backdrop').classList.add('open');
+  $('#' + id).classList.add('open');
+}
+function closeSheets() {
+  $('#backdrop').classList.remove('open');
+  $$('.sheet').forEach(s => s.classList.remove('open'));
+}
+
+// ============================================================
+// TIMELINE RENDER
+// ============================================================
+function renderTimeline(targetId, dense = false) {
+  const target = $('#' + targetId);
+  const hours = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+
+  target.innerHTML = '';
+
+  hours.forEach((time, idx) => {
+    const appts = APPOINTMENTS.filter(a => a.time === time);
+    const isLunch = time === '12:00';
+
+    const row = document.createElement('div');
+    row.className = 'timeline-item' + (appts.length ? ' has-event' : '') + (appts.some(a=>a.status==='in-progress') ? ' in-progress' : '');
+
+    let cardHtml = '';
+    if (appts.length === 0) {
+      if (isLunch) {
+        cardHtml = '<div class="timeline-empty">— พักกลางวัน —</div>';
+      } else if (dense) {
+        cardHtml = '';
+      }
+    } else {
+      cardHtml = '<div class="timeline-card-wrap">' + appts.map(a => `
+        <div class="timeline-card" data-appt="${a.id}">
+          <div class="row1">
+            <span class="pet-name"><span class="emoji">${a.emoji}</span>${a.petName} · ${a.ownerName}</span>
+            <span class="duration">${a.duration} นาที</span>
+          </div>
+          <div class="row2">
+            <span>${a.service}</span>
+            <span class="dot-sep">·</span>
+            <span class="doctor-tag">${a.doctor}</span>
+          </div>
+          <div class="row3">
+            <span class="badge ${a.status}">
+              <span class="dot"></span>
+              ${statusLabel(a.status)}
+            </span>
+            <span class="doctor-tag" style="font-family:'JetBrains Mono',monospace">${sourceIcon(a.source)} ${sourceLabel(a.source)}</span>
+          </div>
+        </div>
+      `).join('') + '</div>';
+    }
+
+    row.innerHTML = `
+      <div class="timeline-time">${time}</div>
+      <div class="timeline-spine"><div class="node"></div></div>
+      ${cardHtml || '<div></div>'}
+    `;
+    target.appendChild(row);
+  });
+
+  // Attach listeners
+  $$('.timeline-card', target).forEach(card => {
+    card.addEventListener('click', () => openAppointment(card.dataset.appt));
+  });
+}
+
+function statusLabel(s) {
+  return ({
+    'confirmed': 'ยืนยันแล้ว',
+    'in-progress': 'กำลังตรวจ',
+    'waiting': 'รอเรียก',
+    'completed': 'เสร็จแล้ว',
+    'pending': 'รอตรวจสอบ',
+    'cancelled': 'ยกเลิก',
+  })[s] || s;
+}
+
+function sourceIcon(s) {
+  return ({
+    'walkin': '🚶',
+    'ai-call': '📞',
+    'ai-line': '💬',
+  })[s] || '';
+}
+function sourceLabel(s) {
+  return ({
+    'walkin': 'walk-in',
+    'ai-call': 'AI รับสาย',
+    'ai-line': 'AI LINE',
+  })[s] || '';
+}
+
+// ============================================================
+// ACTIVITY FEED
+// ============================================================
+function renderActivityFeed() {
+  const target = $('#activityFeed');
+  target.innerHTML = ACTIVITIES.map(ev => `
+    <div class="activity-item" data-event="${ev.id}">
+      <div class="activity-icon ${ev.icon}">
+        ${ev.icon === 'call' ? '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' :
+            ev.icon === 'line' ? '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' :
+            '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        }
+      </div>
+      <div class="activity-content">
+        <div class="activity-row1">
+          <span class="channel">${ev.channel === 'call' ? 'โทรเข้า' : 'LINE'}</span>
+          <span>·</span>
+          <span>${ev.outcome === 'warning' ? '⚠ pending' : ev.outcome === 'success' ? '✓ ' + ev.outcomeText : 'ⓘ ' + ev.outcomeText}</span>
+        </div>
+        <div class="activity-row2">${ev.title}</div>
+        <div class="activity-snippet">${ev.snippet}</div>
+      </div>
+      <div class="activity-time">${ev.time}</div>
+    </div>
+  `).join('');
+
+  $$('.activity-item', target).forEach(el => {
+    el.addEventListener('click', () => openTranscript(el.dataset.event));
+  });
+}
+
+// ============================================================
+// PATIENT LIST
+// ============================================================
+function renderPatients(filter = '') {
+  const target = $('#patientList');
+  const f = filter.toLowerCase().trim();
+  const filtered = f ? PATIENTS.filter(p =>
+    p.petName.toLowerCase().includes(f) || p.ownerName.toLowerCase().includes(f)
+  ) : PATIENTS;
+
+  if (filtered.length === 0) {
+    target.innerHTML = '<div class="empty">ไม่พบคนไข้ที่ค้นหา</div>';
+    return;
+  }
+
+  target.innerHTML = filtered.map(p => `
+    <div class="patient-row" data-patient="${p.id}">
+      <div class="pet-avatar">${p.emoji}</div>
+      <div class="patient-pet">
+        <b>${p.petName}</b>
+        <small>${p.breed} · ${p.age}</small>
+      </div>
+      <div class="patient-owner">
+        ${p.ownerName}
+        <small class="mono">${p.phone}</small>
+      </div>
+      <div class="patient-last">
+        เคยมา <b>${p.visitCount}</b> ครั้ง
+        <small>ล่าสุด ${p.lastVisit}</small>
+      </div>
+      <button class="icon-btn" style="font-size:18px">›</button>
+    </div>
+  `).join('');
+
+  $$('.patient-row', target).forEach(r => {
+    r.addEventListener('click', () => openPatient(r.dataset.patient));
+  });
+}
+
+// ============================================================
+// SERVICE LIST (AI Settings)
+// ============================================================
+function renderServices() {
+  const target = $('#serviceList');
+  target.innerHTML = SERVICES.map(s => `
+    <div class="service-row">
+      <div>
+        <div class="name">${s.name}</div>
+        <div class="meta">${s.duration}</div>
+      </div>
+      <div class="price">฿${s.price.toLocaleString()}</div>
+      <button class="icon-btn" title="แก้ไข">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="icon-btn" title="ลบ">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// SHEETS: TRANSCRIPT
+// ============================================================
+function openTranscript(eventId) {
+  const ev = ACTIVITIES.find(a => a.id === eventId);
+  if (!ev) return;
+
+  $('#transcriptMeta').textContent = `${ev.channel === 'call' ? 'โทรเข้า' : 'LINE OA'} · ${ev.time} วันนี้`;
+
+  let outcomeBanner = '';
+  if (ev.outcome === 'success') {
+    outcomeBanner = `<div class="outcome-banner success"><span class="icon">✓</span><div><b>${ev.outcomeText}</b><small>AI จัดการเองได้ ไม่ต้องตรวจสอบ</small></div></div>`;
+  } else if (ev.outcome === 'info') {
+    outcomeBanner = `<div class="outcome-banner info"><span class="icon">ⓘ</span><div><b>${ev.outcomeText}</b><small>เป็นข้อมูลทั่วไป ไม่ได้ทำการจอง</small></div></div>`;
+  } else if (ev.outcome === 'warning') {
+    outcomeBanner = `<div class="outcome-banner warning"><span class="icon">⚠</span><div><b>${ev.outcomeText}</b><small>AI ไม่กล้าตัดสิน ปล่อยให้ทีมจัดการ</small></div></div>`;
+  }
+
+  $('#transcriptBody').innerHTML = `
+    <div class="transcript-meta">
+      <div class="meta-item"><div class="l">ช่องทาง</div><div class="v">${ev.channel === 'call' ? 'โทรเข้า' : 'LINE OA'}</div></div>
+      <div class="meta-item"><div class="l">เวลา</div><div class="v mono">${ev.time}</div></div>
+      <div class="meta-item"><div class="l">ระยะเวลา</div><div class="v mono">2:34 นาที</div></div>
+      <div class="meta-item"><div class="l">AI accuracy</div><div class="v">${ev.outcome === 'warning' ? '⚠ ส่งต่อ' : '✓ มั่นใจสูง'}</div></div>
+    </div>
+
+    ${outcomeBanner}
+
+    <div class="transcript-lines">
+      ${ev.transcript.map(line => `
+        <div class="tline ${line.who}">
+          <div class="speaker">${line.who === 'ai' ? 'AI' : 'ลูกค้า'}</div>
+          <div class="bubble">${line.text.replace(/\n/g, '<br>')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Show confirm button only for pending items
+  $('#confirmActionBtn').style.display = ev.outcome === 'warning' ? '' : 'none';
+
+  openSheet('transcriptSheet');
+}
+
+// ============================================================
+// SHEETS: APPOINTMENT
+// ============================================================
+function openAppointment(apptId) {
+  const a = APPOINTMENTS.find(x => x.id === apptId);
+  if (!a) return;
+  const patient = PATIENTS.find(p => p.petName === a.petName);
+
+  $('#apptMeta').textContent = `${a.time} วันนี้ · ${a.duration} นาที`;
+
+  $('#appointmentBody').innerHTML = `
+    <div class="appt-detail-card">
+      <div class="appt-pet-large">
+        <div class="ava">${a.emoji}</div>
+        <div style="flex:1">
+          <h4>${a.petName}</h4>
+          <small>${patient ? patient.breed + ' · ' + patient.age : ''}</small>
+        </div>
+        <span class="badge ${a.status}"><span class="dot"></span>${statusLabel(a.status)}</span>
+      </div>
+
+      <div class="appt-kv">
+        <span class="k">เจ้าของ</span>
+        <span class="v">${a.ownerName}${patient ? ' · ' + patient.phone : ''}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">บริการ</span>
+        <span class="v">${a.service}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">หมอที่ดู</span>
+        <span class="v">${a.doctor}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">มาจาก</span>
+        <span class="v">${sourceIcon(a.source)} ${sourceLabel(a.source)}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">ค่าบริการ</span>
+        <span class="v mono">฿${a.price.toLocaleString()}.00</span>
+      </div>
+      ${a.notes ? `
+        <div class="appt-kv">
+          <span class="k" style="color:var(--accent)">หมายเหตุ</span>
+          <span class="v" style="color:var(--accent); font-weight:600">${a.notes}</span>
+        </div>
+      ` : ''}
+    </div>
+
+    ${patient && patient.visitCount > 0 ? `
+      <div class="appt-history">
+        <h5>ประวัติการมา (${patient.visitCount} ครั้ง)</h5>
+        <div class="history-item">
+          <div class="date">15 พ.ค. 69</div>
+          <div class="what"><b>ตรวจสุขภาพประจำปี</b><small>ทุกอย่างปกติ · นัดวัคซีน 3 เดือนถัดไป</small></div>
+        </div>
+        <div class="history-item">
+          <div class="date">02 มี.ค. 69</div>
+          <div class="what"><b>ฉีดวัคซีน 4-in-1</b><small>หมอวรา · ไม่มีอาการแพ้</small></div>
+        </div>
+        <div class="history-item">
+          <div class="date">18 ม.ค. 69</div>
+          <div class="what"><b>ตัดเล็บ + ทำความสะอาดหู</b><small>หูสะอาด ไม่มีไรหู</small></div>
+        </div>
+      </div>
+    ` : ''}
+  `;
+
+  openSheet('appointmentSheet');
+}
+
+// ============================================================
+// SHEETS: PATIENT
+// ============================================================
+function openPatient(patientId) {
+  const p = PATIENTS.find(x => x.id === patientId);
+  if (!p) return;
+
+  $('#patientMeta').textContent = `${p.petName} · ${p.ownerName}`;
+
+  $('#patientBody').innerHTML = `
+    <div class="appt-detail-card">
+      <div class="appt-pet-large">
+        <div class="ava">${p.emoji}</div>
+        <div style="flex:1">
+          <h4>${p.petName}</h4>
+          <small>${p.breed} · ${p.age}</small>
+        </div>
+      </div>
+
+      <div class="appt-kv">
+        <span class="k">เจ้าของ</span>
+        <span class="v">${p.ownerName}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">เบอร์ติดต่อ</span>
+        <span class="v mono">${p.phone}</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">เคยมาทั้งหมด</span>
+        <span class="v">${p.visitCount} ครั้ง</span>
+      </div>
+      <div class="appt-kv">
+        <span class="k">มาล่าสุด</span>
+        <span class="v">${p.lastVisit}</span>
+      </div>
+    </div>
+
+    ${p.visitCount > 0 ? `
+      <div class="appt-history">
+        <h5>ประวัติการรักษา</h5>
+        <div class="history-item">
+          <div class="date">${p.lastVisit}</div>
+          <div class="what"><b>เคสล่าสุด</b><small>หมอวรา · บันทึก: ทุกอย่างปกติ</small></div>
+        </div>
+        <div class="history-item">
+          <div class="date">15 พ.ค. 69</div>
+          <div class="what"><b>ฉีดวัคซีนรวม</b><small>ไม่มีอาการแพ้</small></div>
+        </div>
+        <div class="history-item">
+          <div class="date">02 มี.ค. 69</div>
+          <div class="what"><b>ตรวจสุขภาพประจำปี</b><small>น้ำหนัก 3.8 kg · ค่าเลือดปกติ</small></div>
+        </div>
+      </div>
+    ` : '<div class="empty">น้องยังไม่เคยมาที่คลินิก</div>'}
+  `;
+
+  openSheet('patientSheet');
+}
+
+// ============================================================
+// TEST AI CHAT
+// ============================================================
+let testHistory = [];
+function renderTestChat() {
+  const chat = $('#testChat');
+  chat.innerHTML = testHistory.map(m => `
+    <div class="test-msg ${m.who}">${m.text.replace(/\n/g, '<br>')}</div>
+  `).join('');
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function aiReply(userText) {
+  const t = userText.toLowerCase();
+  if (/ฉีดวัคซีน|วัคซีน/.test(t)) {
+    return 'วัคซีนแมวที่นี่มี 2 แบบนะคะ\n\n• วัคซีนรวม 4-in-1 = 600 บาท\n• วัคซีนป้องกันพิษสุนัขบ้า = 200 บาท\n\nสนใจจองนัดเลยไหมคะ';
+  }
+  if (/พรุ่งนี้|มะรืน|วันที่|นัด.*คิว|มีคิว/.test(t)) {
+    return 'พรุ่งนี้บ่าย 2 หรือบ่าย 3 ว่างค่ะ คุณสะดวกเวลาไหนคะ';
+  }
+  if (/ท้องเสีย|ป่วย|อ้วก|ไม่กิน|ซึม/.test(t)) {
+    return 'รับทราบค่ะ เรื่องอาการป่วยและการรักษา ดิฉันจะให้คุณหมอเป็นคนตอบนะคะ จะให้โทรกลับใน 30 นาที หรือสะดวกพาน้องมาตรวจเลยไหมคะ';
+  }
+  if (/เปิด|กี่โมง|ปิด/.test(t)) {
+    return 'เวลาทำการของคลินิกนะคะ\n\n• จันทร์-ศุกร์: 9:00 - 18:00\n• เสาร์: 10:00 - 16:00\n• อาทิตย์: ปิด';
+  }
+  if (/ราคา|เท่าไหร่|กี่บาท/.test(t)) {
+    return 'รบกวนระบุบริการที่สนใจหน่อยได้ไหมคะ เช่น ฉีดวัคซีน ตรวจสุขภาพ ตัดเล็บ ทำหมัน — ดิฉันจะแจ้งราคาให้นะคะ';
+  }
+  if (/ที่อยู่|ที่ตั้ง|อยู่ไหน/.test(t)) {
+    return 'คลินิกสัตวแพทย์ใจดี อยู่ที่ 125/3 ถ.พหลโยธิน ใกล้ MRT พหลโยธิน 24 จอดรถได้ในซอยค่ะ';
+  }
+  if (/สวัสดี|hello|hi/.test(t)) {
+    return 'สวัสดีค่ะ คลินิกสัตวแพทย์ใจดี มีอะไรให้ช่วยคะ';
+  }
+  return 'ขอโทษนะคะ ดิฉันไม่แน่ใจในคำถามนี้ จะให้คุณหมอติดต่อกลับนะคะ รบกวนทิ้งเบอร์ไว้ได้ไหมคะ';
+}
+
+function sendTestMessage(text) {
+  if (!text.trim()) return;
+  testHistory.push({ who: 'user', text });
+  renderTestChat();
+  $('#testInput').value = '';
+  setTimeout(() => {
+    testHistory.push({ who: 'ai', text: aiReply(text) });
+    renderTestChat();
+  }, 600);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function setView(name) {
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $('#' + name + 'View').classList.add('active');
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
+
+  const titles = {
+    dashboard: { t: 'หน้าหลัก', s: 'ภาพรวมวันนี้ · จันทร์ 30 มิถุนายน 2569' },
+    schedule: { t: 'คิวนัด', s: 'จัดการตารางและจองคิวเอง' },
+    patients: { t: 'คนไข้', s: PATIENTS.length + ' รายในระบบ' },
+    ai: { t: 'ตั้งค่า AI', s: 'ปรับวิธีคุย น้ำเสียง และกฎความปลอดภัย' },
+    reports: { t: 'รายงาน', s: 'ภาพรวมประสิทธิภาพ AI ของคุณ' },
+  };
+  $('#viewTitle').textContent = titles[name].t;
+  $('#viewSubtitle').textContent = titles[name].s;
+
+  if (name === 'schedule') renderTimeline('timelineFull', false);
+  if (name === 'patients') renderPatients();
+  if (name === 'ai') renderServices();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderTimeline('timeline', true);
+  renderActivityFeed();
+
+  // Nav
+  $$('.nav-item').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+  // Close sheets
+  $$('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
+  $('#backdrop').addEventListener('click', closeSheets);
+
+  // Search
+  $('#patientSearch').addEventListener('input', e => renderPatients(e.target.value));
+
+  // AI toggle
+  $('#aiToggle').addEventListener('click', () => {
+    const t = $('#aiToggle');
+    t.classList.toggle('on');
+    const on = t.classList.contains('on');
+    $('#statusDot').classList.toggle('active', on);
+    $('#statusDot').style.background = on ? 'var(--success)' : '#cbd5e0';
+    $('#aiStatusText').textContent = on ? 'AI กำลังทำงาน' : 'AI ปิดอยู่';
+    $('#aiStatusSub').textContent = on ? 'รับสายอัตโนมัติ 24 ชม.' : 'พนักงานต้องรับสายเอง';
+    toast(on ? 'เปิด AI receptionist แล้ว' : 'ปิด AI · สายจะตกถึงพนักงานทันที');
+  });
+
+  // Voice options
+  $$('.voice-option').forEach(b => {
+    b.addEventListener('click', () => {
+      $$('.voice-option').forEach(o => o.classList.remove('active'));
+      b.classList.add('active');
+      toast('เปลี่ยนเสียงเป็น "' + b.querySelector('b').textContent + '"');
+    });
+  });
+
+  // Other toggles in settings
+  $$('.setting-card .toggle').forEach(t => {
+    if (!t.id) {
+      t.addEventListener('click', () => {
+        t.classList.toggle('on');
+      });
+    }
+  });
+
+  // Add service
+  $('#addServiceBtn').addEventListener('click', () => {
+    toast('ฟีเจอร์นี้ยังเป็น mock — ในของจริงเปิด modal ให้กรอกได้');
+  });
+
+  // Test FAB
+  $('#testFab').addEventListener('click', () => {
+    if (testHistory.length === 0) {
+      testHistory.push({ who: 'ai', text: 'สวัสดีค่ะ คลินิกสัตวแพทย์ใจดี ดิฉันใบบัวค่ะ มีอะไรให้ช่วยคะ\n\n(ลองทักเหมือนเป็นลูกค้าจริง เพื่อทดสอบว่า AI ตอบเหมาะสมไหม)' });
+      renderTestChat();
+    }
+    openSheet('testSheet');
+  });
+
+  // Test input
+  $('#testSendBtn').addEventListener('click', () => sendTestMessage($('#testInput').value));
+  $('#testInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendTestMessage($('#testInput').value);
+  });
+
+  // Quick test buttons
+  $$('#testQuick button').forEach(b => {
+    b.addEventListener('click', () => {
+      const text = b.textContent.replace(/"/g, '').trim();
+      sendTestMessage(text);
+    });
+  });
+
+  // Confirm action (in transcript sheet)
+  $('#confirmActionBtn').addEventListener('click', () => {
+    closeSheets();
+    toast('ยืนยันการจองแล้ว · AI จะส่ง confirmation ให้ลูกค้า');
+  });
+});
+</script>
+
+</body>
+</html>
